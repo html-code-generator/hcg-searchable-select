@@ -1,0 +1,214 @@
+/* hcg-select - pure vanilla JS searchable select dropdown */
+/* Author: HTML Code Generator */
+/* Page: https://www.html-code-generator.com/javascript/searchable-select */
+
+.hcg-select {
+  --hcg-select-border: #cbd5e1;
+  --hcg-select-border-focus: #2563eb;
+  --hcg-select-bg: #fff;
+  --hcg-select-hover: #eff6ff;
+  --hcg-select-active: #dbeafe;
+  --hcg-select-text: #1e293b;
+  --hcg-select-muted: #64748b;
+  --hcg-select-mark: #fde047;
+  --hcg-select-clear: #ef4444;
+  --hcg-select-radius: 8px;
+  --hcg-select-z: 9999;
+  --hcg-select-panel-width: 100%;
+  --hcg-select-font-family: inherit;
+  --hcg-select-font-size: 15px;
+  --hcg-select-option-font-size: 14px;
+  --hcg-select-font-weight: 400;
+
+  position: relative;
+  width: 100%;
+  font-family: var(--hcg-select-font-family);
+  color: var(--hcg-select-text);
+  box-sizing: border-box;
+}
+.hcg-select *,
+.hcg-select *::before,
+.hcg-select *::after { box-sizing: border-box; }
+
+/* - visually hide the native select but keep it for form submission - */
+.hcg-select-native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* - whole widget disabled (native <select disabled>) - */
+.hcg-select.is-disabled { opacity: 0.6; }
+.hcg-select.is-disabled .hcg-select-control {
+  cursor: not-allowed;
+  background: #f1f5f9;
+}
+
+.hcg-select-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--hcg-select-bg);
+  border: 1px solid var(--hcg-select-border);
+  border-radius: var(--hcg-select-radius);
+  cursor: pointer;
+  font-family: var(--hcg-select-font-family);
+  font-size: var(--hcg-select-font-size);
+  font-weight: var(--hcg-select-font-weight);
+  line-height: 1.3;
+  user-select: none;
+}
+.hcg-select-control:focus,
+.hcg-select.is-open .hcg-select-control {
+  outline: none;
+  border-color: var(--hcg-select-border-focus);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.hcg-select-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hcg-select-label {
+  flex: 1 1 auto;
+}
+.hcg-select-label.hcg-select-placeholder { color: var(--hcg-select-muted); }
+
+/* - clear ("x") button, shown only when clearable and a value is selected - */
+.hcg-select-clear {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--hcg-select-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.hcg-select-clear:hover {
+  background: color-mix(in srgb, var(--hcg-select-clear) 15%, transparent);
+  color: var(--hcg-select-clear);
+}
+.hcg-select-clear[hidden] { display: none; }
+
+.hcg-select-caret {
+  flex: 0 0 auto;
+  border: 5px solid transparent;
+  border-top-color: var(--hcg-select-muted);
+  margin-top: 4px;
+  transition: transform 0.15s ease;
+}
+.hcg-select.is-open .hcg-select-caret { transform: rotate(180deg); margin-top: -4px; }
+
+.hcg-select-panel {
+  position: absolute;
+  z-index: var(--hcg-select-z);
+  top: calc(100% + 4px);
+  left: 0;
+  width: var(--hcg-select-panel-width);
+  min-width: 100%;
+  background: var(--hcg-select-bg);
+  border: 1px solid var(--hcg-select-border);
+  border-radius: var(--hcg-select-radius);
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+  padding: 8px;
+  transform-origin: top center;
+  animation: hcg-select-in 0.14s ease;
+}
+.hcg-select-panel[hidden] { display: none; }
+
+/* - flipped: panel opens upward when there is no room below - */
+.hcg-select.is-flipped .hcg-select-panel {
+  top: auto;
+  bottom: calc(100% + 4px);
+  transform-origin: bottom center;
+}
+
+@keyframes hcg-select-in {
+  from { opacity: 0; transform: scaleY(0.96) translateY(-4px); }
+  to   { opacity: 1; transform: scaleY(1) translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hcg-select-panel { animation: none; }
+  .hcg-select-caret { transition: none; }
+}
+
+.hcg-select-search {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--hcg-select-border);
+  border-radius: 6px;
+  font-size: var(--hcg-select-option-font-size);
+  font-family: var(--hcg-select-font-family);
+  margin-bottom: 6px;
+}
+.hcg-select-search:focus {
+  outline: none;
+  border-color: var(--hcg-select-border-focus);
+}
+
+.hcg-select-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  /* - offset parent for the options, so list-internal scrolling math works - */
+  position: relative;
+}
+.hcg-select-option {
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: var(--hcg-select-option-font-size);
+}
+.hcg-select-option[hidden] { display: none; }
+.hcg-select-option.is-grouped { padding-left: 22px; }
+.hcg-select-option:hover { background: var(--hcg-select-hover); }
+
+/* - non-selectable <optgroup> header - */
+.hcg-select-group {
+  padding: 8px 10px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--hcg-select-muted);
+  pointer-events: none;
+}
+.hcg-select-group[hidden] { display: none; }
+.hcg-select-option.is-active { background: var(--hcg-select-active); }
+.hcg-select-option.is-disabled {
+  color: var(--hcg-select-muted);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.hcg-select-option.is-disabled:hover { background: transparent; }
+.hcg-select-option[aria-selected="true"] { font-weight: 600; }
+.hcg-select-option mark {
+  background: var(--hcg-select-mark);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.hcg-select-empty {
+  padding: 10px;
+  font-size: var(--hcg-select-option-font-size);
+  color: var(--hcg-select-muted);
+  text-align: center;
+}
+.hcg-select-empty[hidden] { display: none; }

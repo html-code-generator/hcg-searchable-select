@@ -1,0 +1,41 @@
+{
+  "name": "hcg-searchable-select",
+  "version": "1.0.0",
+  "description": "Pure vanilla JavaScript searchable select dropdown. No dependencies. Progressively enhances a native <select> with type-to-search, match highlighting, and keyboard navigation.",
+  "main": "hcg-select.js",
+  "style": "hcg-select.css",
+  "files": [
+    "hcg-select.js",
+    "hcg-select.css",
+    "react/HcgSelect.jsx",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": [
+    "select",
+    "searchable",
+    "searchable-select",
+    "hcg-select",
+    "dropdown",
+    "combobox",
+    "autocomplete",
+    "filter",
+    "vanilla-js",
+    "no-dependencies",
+    "accessible",
+    "aria"
+  ],
+  "author": "HTML Code Generator (https://www.html-code-generator.com/)",
+  "license": "MIT",
+  "homepage": "https://github.com/html-code-generator/hcg-searchable-select#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/html-code-generator/hcg-searchable-select.git"
+  },
+  "bugs": {
+    "url": "https://github.com/html-code-generator/hcg-searchable-select/issues"
+  }
+}

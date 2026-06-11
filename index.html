@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hcg-select - Vanilla JS Searchable Select</title>
+<link rel="stylesheet" href="hcg-select.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0b1120;
+    --bg-2: #111a2e;
+    --panel: #16203a;
+    --panel-2: #1c2845;
+    --border: #273350;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --sapphire: #3b82f6;
+    --sapphire-glow: rgba(59, 130, 246, 0.35);
+    --neon: #22d3ee;
+    --emerald: #10b981;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Inter", system-ui, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(59,130,246,0.12), transparent),
+      radial-gradient(900px 500px at -10% 10%, rgba(34,211,238,0.08), transparent),
+      var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 56px 20px 80px; }
+
+  header.hero { text-align: center; margin-bottom: 48px; }
+  .badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--neon);
+    border: 1px solid var(--border);
+    background: var(--panel);
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 20px;
+  }
+  .hero h1 {
+    font-size: clamp(32px, 6vw, 54px);
+    font-weight: 700;
+    margin: 0 0 14px;
+    background: linear-gradient(120deg, #fff, var(--sapphire) 60%, var(--neon));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p { color: var(--muted); font-size: 18px; max-width: 620px; margin: 0 auto; line-height: 1.6; }
+  .hero .pills { margin-top: 22px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .pill {
+    font-size: 13px; color: var(--text);
+    background: var(--panel); border: 1px solid var(--border);
+    padding: 7px 13px; border-radius: 999px;
+  }
+  .pill b { color: var(--neon); font-weight: 600; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: linear-gradient(180deg, var(--panel), var(--bg-2));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+  }
+  .card h3 { margin: 0 0 4px; font-size: 16px; }
+  .card .sub { color: var(--muted); font-size: 13px; margin-bottom: 16px; }
+  label.f { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 7px; }
+  .out {
+    margin-top: 12px; font-size: 12px; font-family: "JetBrains Mono", monospace;
+    color: var(--neon); word-break: break-all;
+  }
+
+  /* - dark theme for the widget via CSS variables - */
+  .hcg-select {
+    --hcg-select-bg: var(--panel-2);
+    --hcg-select-border: var(--border);
+    --hcg-select-border-focus: var(--sapphire);
+    --hcg-select-text: var(--text);
+    --hcg-select-muted: var(--muted);
+    --hcg-select-hover: #233155;
+    --hcg-select-active: #2c3c66;
+    --hcg-select-mark: #facc15;
+    --hcg-select-radius: 10px;
+  }
+  .hcg-select-control { box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+  .hcg-select.is-open .hcg-select-control { box-shadow: 0 0 0 3px var(--sapphire-glow); }
+  .hcg-select-panel { background: var(--panel-2); }
+
+  /* - emerald custom theme: distinct even at rest (border + caret + accent) - */
+  .theme-emerald .hcg-select {
+    --hcg-select-border: #1f6f54;
+    --hcg-select-border-focus: var(--emerald);
+    --hcg-select-active: #0f3d2e;
+    --hcg-select-hover: #0e3327;
+    --hcg-select-mark: #6ee7b7;
+  }
+  .theme-emerald .hcg-select-control {
+    background: linear-gradient(180deg, #123528, #0d2a20);
+  }
+  .theme-emerald .hcg-select-caret { border-top-color: var(--emerald); }
+  .theme-emerald .hcg-select-panel { border-color: #1f6f54; }
+  .theme-emerald .hcg-select-option[aria-selected="true"] { color: #6ee7b7; }
+  .theme-emerald .hcg-select.is-open .hcg-select-control { box-shadow: 0 0 0 3px rgba(16,185,129,0.3); }
+
+  /* - playground - */
+  .play { margin: 40px 0; }
+  .play-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; }
+  @media (max-width: 760px) { .play-grid { grid-template-columns: 1fr; } }
+  .toggles { display: flex; flex-direction: column; gap: 14px; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .toggle-row span { font-size: 14px; }
+  .switch { position: relative; width: 42px; height: 24px; flex: 0 0 auto; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; inset: 0; cursor: pointer; border-radius: 999px;
+    background: var(--border); transition: 0.2s;
+  }
+  .slider::before {
+    content: ""; position: absolute; height: 18px; width: 18px; left: 3px; top: 3px;
+    background: #fff; border-radius: 50%; transition: 0.2s;
+  }
+  .switch input:checked + .slider { background: var(--sapphire); box-shadow: 0 0 12px var(--sapphire-glow); }
+  .switch input:checked + .slider::before { transform: translateX(18px); }
+  .ph-input {
+    width: 100%; margin-top: 4px; padding: 9px 11px; border-radius: 8px;
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+    font-family: inherit; font-size: 14px;
+  }
+  .ph-input:focus { outline: none; border-color: var(--sapphire); }
+
+  pre.code {
+    margin: 0; background: #0a0f1e; border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px; font-family: "JetBrains Mono", monospace; font-size: 12.5px;
+    line-height: 1.6; color: #cbd5e1; overflow-x: auto;
+  }
+  pre.code .k { color: #c084fc; }
+  pre.code .s { color: #6ee7b7; }
+  pre.code .t { color: #93c5fd; }
+  .copy-btn {
+    margin-top: 10px; font-size: 12px; font-weight: 600; cursor: pointer;
+    color: var(--text); background: var(--panel); border: 1px solid var(--border);
+    padding: 8px 14px; border-radius: 8px; transition: 0.15s;
+  }
+  .copy-btn:hover { border-color: var(--sapphire); color: var(--neon); }
+
+  /* - event logger terminal - */
+  .terminal {
+    margin-top: 40px; background: #070c18; border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .terminal .bar {
+    display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+    background: #0c1426; border-bottom: 1px solid var(--border);
+  }
+  .terminal .bar .dot { width: 11px; height: 11px; border-radius: 50%; }
+  .dot.r { background: #ff5f57; } .dot.y { background: #febc2e; } .dot.g { background: #28c840; }
+  .terminal .bar .title { margin-left: 8px; font-size: 12px; color: var(--muted); font-family: "JetBrains Mono", monospace; }
+  .terminal .bar button {
+    margin-left: auto; font-size: 11px; background: transparent; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; cursor: pointer;
+  }
+  .log {
+    height: 180px; overflow-y: auto; padding: 14px 16px; margin: 0;
+    font-family: "JetBrains Mono", monospace; font-size: 12.5px; line-height: 1.7;
+  }
+  .log .line { white-space: pre-wrap; }
+  .log .ts { color: #475569; }
+  .log .ev-change { color: var(--neon); }
+  .log .ev-onOpen { color: var(--emerald); }
+  .log .ev-onClose { color: #fbbf24; }
+  .log .ev-onChange { color: #c084fc; }
+  .log .muted { color: var(--muted); }
+
+  h2.section { font-size: 22px; margin: 48px 0 18px; }
+  footer { margin-top: 60px; text-align: center; color: var(--muted); font-size: 13px; }
+  footer a { color: var(--neon); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="badge">Vanilla JS - Zero Dependencies</span>
+    <h1>hcg-select</h1>
+    <p>A searchable, accessible <code>&lt;select&gt;</code> that progressively enhances native markup. Optgroups, clearable, keyboard-first, mobile-aware, and themeable.</p>
+    <div class="pills">
+      <span class="pill"><b>~9 KB</b> minified-ish</span>
+      <span class="pill"><b>0</b> dependencies</span>
+      <span class="pill"><b>ARIA</b> combobox</span>
+      <span class="pill"><b>React</b> ready</span>
+    </div>
+  </header>
+
+  <!-- LIVE PLAYGROUND -->
+  <h2 class="section">Live playground</h2>
+  <section class="play card">
+    <div class="play-grid">
+      <div>
+        <label class="f" id="pg-label" for="pg">Configured select</label>
+        <select id="pg" data-placeholder="Select a framework">
+          <option value="">- Select a framework -</option>
+          <option value="react">React</option>
+          <option value="vue">Vue</option>
+          <option value="svelte" selected>Svelte</option>
+          <option value="angular">Angular</option>
+          <option value="solid">SolidJS</option>
+          <option value="qwik">Qwik</option>
+          <option value="astro">Astro</option>
+        </select>
+        <div class="out" id="pg-out">value: svelte</div>
+
+        <div class="toggles" style="margin-top:22px">
+          <div class="toggle-row"><span>Clearable</span>
+            <label class="switch"><input type="checkbox" id="t-clear"><span class="slider"></span></label></div>
+          <div class="toggle-row"><span>Type-ahead</span>
+            <label class="switch"><input type="checkbox" id="t-typeahead" checked><span class="slider"></span></label></div>
+          <div class="toggle-row"><span>Disabled</span>
+            <label class="switch"><input type="checkbox" id="t-disabled"><span class="slider"></span></label></div>
+          <div class="toggle-row"><span>Placeholder</span></div>
+          <input class="ph-input" id="t-placeholder" value="Select a framework">
+        </div>
+      </div>
+
+      <div>
+        <label class="f">Generated code</label>
+        <pre class="code" id="pg-code"></pre>
+        <button class="copy-btn" id="pg-copy">Copy code</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXAMPLES GRID -->
+  <h2 class="section">Examples</h2>
+  <div class="grid">
+
+    <div class="card">
+      <h3>Grouped options</h3>
+      <div class="sub">Native <code>&lt;optgroup&gt;</code> headers, with a disabled group.</div>
+      <select id="ex-group" data-hcg-select data-placeholder="Pick something tasty">
+        <option value="">- Pick something tasty -</option>
+        <optgroup label="Fruits">
+          <option value="apple">Apple</option>
+          <option value="banana">Banana</option>
+          <option value="mango">Mango</option>
+        </optgroup>
+        <optgroup label="Drinks" disabled>
+          <option value="cola">Cola (out of stock)</option>
+          <option value="tea">Tea</option>
+        </optgroup>
+        <optgroup label="Desserts">
+          <option value="cake">Cake</option>
+          <option value="pie">Pie</option>
+          <option value="gelato">Gelato</option>
+        </optgroup>
+      </select>
+      <div class="out" id="out-group">value: (none)</div>
+    </div>
+
+    <div class="card">
+      <h3>Clearable</h3>
+      <div class="sub">A clear button appears once a value is chosen.</div>
+      <select id="ex-clear" data-hcg-select data-clearable data-placeholder="Choose a city">
+        <option value="">- Choose a city -</option>
+        <option value="ldn">London</option>
+        <option value="par" selected>Paris</option>
+        <option value="tok">Tokyo</option>
+        <option value="nyc">New York</option>
+        <option value="del">Delhi</option>
+      </select>
+      <div class="out" id="out-clear">value: par</div>
+    </div>
+
+    <div class="card theme-emerald">
+      <h3>Custom theme</h3>
+      <div class="sub">Restyled with CSS variables (emerald accent).</div>
+      <select id="ex-theme" data-hcg-select data-placeholder="Pick a plan">
+        <option value="">- Pick a plan -</option>
+        <option value="free">Free</option>
+        <option value="pro" selected>Pro</option>
+        <option value="team">Team</option>
+        <option value="ent">Enterprise</option>
+      </select>
+      <div class="out" id="out-theme">value: pro</div>
+    </div>
+
+    <div class="card">
+      <h3>Disabled state</h3>
+      <div class="sub">Whole control disabled and non-interactive.</div>
+      <select id="ex-disabled" data-hcg-select data-placeholder="Locked" disabled>
+        <option value="">- Locked -</option>
+        <option value="a">Alpha</option>
+        <option value="b" selected>Bravo</option>
+      </select>
+      <div class="out" id="out-disabled">disabled</div>
+    </div>
+
+  </div>
+
+  <!-- EVENT LOGGER -->
+  <h2 class="section">Real-time event logger</h2>
+  <div class="terminal">
+    <div class="bar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="title">events.log - playground select</span>
+      <button id="log-clear">clear</button>
+    </div>
+    <div class="log" id="log"><div class="line muted">Interact with the playground select above to see events...</div></div>
+  </div>
+
+  <footer>
+    Built with <a href="https://www.html-code-generator.com/">HTML Code Generator</a> - MIT licensed - pure vanilla JS
+  </footer>
+</div>
+
+<script src="hcg-select.js"></script>
+<script>
+  /* - simple value readouts for the example selects - */
+  function bind(id, outId, prefix) {
+    var sel = document.getElementById(id);
+    var out = document.getElementById(outId);
+    sel.addEventListener("change", function () {
+      out.textContent = (prefix || "value: ") + (sel.value || "(none)");
+    });
+  }
+  bind("ex-group", "out-group");
+  bind("ex-clear", "out-clear");
+  bind("ex-theme", "out-theme");
+
+  /* - event logger - */
+  var logEl = document.getElementById("log");
+  var first = true;
+  function logEvent(type, detail) {
+    if (first) { logEl.innerHTML = ""; first = false; }
+    var ts = new Date().toLocaleTimeString();
+    var line = document.createElement("div");
+    line.className = "line";
+    line.innerHTML = '<span class="ts">' + ts + '</span>  <span class="ev-' + type + '">' +
+      type + '</span> <span class="muted">' + detail + '</span>';
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  document.getElementById("log-clear").addEventListener("click", function () {
+    logEl.innerHTML = ""; first = false;
+  });
+
+  /* - playground configurator - */
+  var pgApi = null;
+  var cfg = {
+    clearable: false,
+    typeAhead: true,
+    disabled: false,
+    placeholder: "Select a framework"
+  };
+  var pgOut = document.getElementById("pg-out");
+  var codeEl = document.getElementById("pg-code");
+
+  function renderCode() {
+    var o = [];
+    o.push('placeholder: <span class="s">"' + cfg.placeholder + '"</span>');
+    if (cfg.clearable) o.push('clearable: <span class="k">true</span>');
+    if (!cfg.typeAhead) o.push('typeAhead: <span class="k">false</span>');
+    var body = o.map(function (l) { return "  " + l; }).join(",\n");
+    codeEl.innerHTML =
+      '<span class="k">import</span> hcgSelect <span class="k">from</span> <span class="s">"hcg-searchable-select"</span>;\n\n' +
+      '<span class="t">hcgSelect</span>(<span class="s">"#framework"</span>, {\n' + body + '\n});' +
+      (cfg.disabled ? '\n\n<span class="t">hcgSelect</span>(<span class="s">"#framework"</span>).<span class="t">disable</span>();' : '');
+  }
+
+  function buildPlayground() {
+    if (pgApi) pgApi.destroy();
+    var sel = document.getElementById("pg");
+    sel.setAttribute("data-placeholder", cfg.placeholder);
+    pgApi = hcgSelect(sel, {
+      placeholder: cfg.placeholder,
+      clearable: cfg.clearable,
+      typeAhead: cfg.typeAhead,
+      onChange: function (v) { pgOut.textContent = "value: " + (v || "(none)"); logEvent("onChange", "value=" + (v || "(none)")); },
+      onOpen: function () { logEvent("onOpen", "panel opened"); },
+      onClose: function () { logEvent("onClose", "panel closed"); }
+    });
+    pgApi.setDisabled(cfg.disabled);
+    document.getElementById("pg").addEventListener("change", function () {
+      logEvent("change", "native change -> " + (this.value || "(none)"));
+    });
+    renderCode();
+  }
+
+  document.getElementById("t-clear").addEventListener("change", function () { cfg.clearable = this.checked; buildPlayground(); });
+  document.getElementById("t-typeahead").addEventListener("change", function () { cfg.typeAhead = this.checked; buildPlayground(); });
+  document.getElementById("t-disabled").addEventListener("change", function () { cfg.disabled = this.checked; buildPlayground(); });
+  document.getElementById("t-placeholder").addEventListener("input", function () { cfg.placeholder = this.value || "Select..."; buildPlayground(); });
+
+  document.getElementById("pg-copy").addEventListener("click", function () {
+    var text = codeEl.textContent;
+    navigator.clipboard && navigator.clipboard.writeText(text);
+    this.textContent = "Copied!";
+    var btn = this;
+    setTimeout(function () { btn.textContent = "Copy code"; }, 1400);
+  });
+
+  buildPlayground();
+</script>
+</body>
+</html>
