@@ -1,4 +1,4 @@
-# hcg-select
+# hcg-searchable-select
 
 A pure vanilla JavaScript searchable `<select>` dropdown. **No dependencies.** It progressively enhances a normal `<select>` element, so your forms keep working and submit a regular value.
 
@@ -26,7 +26,8 @@ A pure vanilla JavaScript searchable `<select>` dropdown. **No dependencies.** I
 
 - **Live demo and documentation:** [https://www.html-code-generator.com/javascript/searchable-select](https://www.html-code-generator.com/javascript/searchable-select)
 - **npm package:** [https://www.npmjs.com/package/hcg-searchable-select](https://www.npmjs.com/package/hcg-searchable-select)
-- Or open `index.html` from this repo in a browser.
+- **GitHub:** [https://github.com/html-code-generator/hcg-searchable-select](https://github.com/html-code-generator/hcg-searchable-select)
+- Or open `index.html` from the GitHub repo in a browser.
 
 ## Install
 

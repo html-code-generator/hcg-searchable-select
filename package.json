@@ -1,6 +1,6 @@
 {
   "name": "hcg-searchable-select",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Pure vanilla JavaScript searchable select dropdown. No dependencies. Progressively enhances a native <select> with type-to-search, match highlighting, and keyboard navigation.",
   "main": "hcg-select.js",
   "style": "hcg-select.css",
