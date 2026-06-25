@@ -2,6 +2,8 @@
 
 A pure vanilla JavaScript searchable `<select>` dropdown. **No dependencies.** It progressively enhances a normal `<select>` element, so your forms keep working and submit a regular value.
 
+![Normal HTML select compared with hcg-searchable-select showing a search box](native-select-vs-searchable-select.webp)
+
 ## Features
 
 - Type-to-search filtering with match highlighting (`<mark>`)
@@ -104,6 +106,10 @@ hcgSelect("#country", {
   searchPlaceholder: "Type to search...",
   noResultsText: "Nothing found"
 });
+
+// Re-scan after adding markup later (whole document or a container element)
+hcgSelect.init();
+hcgSelect.init(document.getElementById("form-section"));
 ```
 
 `hcgSelect` accepts a CSS selector string or a DOM element, and returns an API:
@@ -112,6 +118,7 @@ hcgSelect("#country", {
 var api = hcgSelect(document.getElementById("country"));
 api.open();      // open the panel
 api.close();     // close the panel
+api.clear();     // reset to the placeholder option (when clearable)
 api.refresh();        // rebuild the list from the current <option>s, then re-sync label + disabled state
 api.disable();        // disable the widget (sets the native select.disabled = true)
 api.enable();         // enable the widget
@@ -164,6 +171,8 @@ It fires *after* the native `change` event, so both mechanisms stay in sync.
 
 The core is framework-agnostic vanilla JS, so it works in React via a `ref` +
 `useEffect`. The `destroy()` API method makes mount/unmount clean.
+
+**Live React demo on StackBlitz:** [https://stackblitz.com/edit/hcg-searchable-select-react](https://stackblitz.com/edit/hcg-searchable-select-react)
 
 ### Option A: use the bundled component
 
@@ -233,6 +242,7 @@ function CountrySelect({ value, onChange }) {
 | `placeholder`       | `"Select..."` | Text shown when nothing is selected. Falls back to `data-placeholder`. |
 | `searchPlaceholder` | `"Search..."` | Placeholder text for the search input.       |
 | `noResultsText`     | `"No results"`| Text shown when no option matches.           |
+| `clearable`         | `false`       | Show a clear button (requires a first `<option value="">` placeholder). Also via `data-clearable`. |
 | `typeAhead`         | `true`        | When the control is focused and closed, typing a letter jumps to the first matching option (native-select behavior). Set `false` to disable. |
 | `onChange`          | -             | `function(value, option, select)` called when the user selects an option (after the native `change` event). |
 | `onOpen`            | -             | `function(select, api)` called when the panel opens. |

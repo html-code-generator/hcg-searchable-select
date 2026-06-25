@@ -16,10 +16,10 @@
 
   let idSeq = 0;
 
+  const HTML_ESCAPE = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+
   function escapeHtml(str) {
-    return String(str).replace(/[&<>"']/g, (c) => {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-    });
+    return String(str).replace(/[&<>"']/g, (c) => HTML_ESCAPE[c]);
   }
 
   /* - wrap the matched query inside the label with <mark>, HTML-escaped - */
@@ -96,7 +96,7 @@
     clearBtn.setAttribute("aria-label", "Clear selection");
     clearBtn.setAttribute("tabindex", "-1");
     clearBtn.hidden = true;
-    clearBtn.innerHTML = "&times;";
+    clearBtn.textContent = "\u00D7";
 
     const caret = document.createElement("span");
     caret.className = "hcg-select-caret";
@@ -340,8 +340,20 @@
       const rect = control.getBoundingClientRect();
       const below = window.innerHeight - rect.bottom;
       const above = rect.top;
-      const panelH = panel.offsetHeight;
+      const panelH = panel.offsetHeight || 280;
       if (below < panelH && above > below) wrap.classList.add("is-flipped");
+    }
+
+    function schedulePositionPanel() {
+      if (typeof requestAnimationFrame === "function") {
+        requestAnimationFrame(positionPanel);
+      } else {
+        positionPanel();
+      }
+    }
+
+    function onViewportChange() {
+      if (!panel.hidden) schedulePositionPanel();
     }
 
     function open() {
@@ -359,8 +371,10 @@
       const sel = selectableItems();
       const selIdx = sel.findIndex((li) => Number(li.dataset.index) === select.selectedIndex);
       setActive(selIdx >= 0 ? selIdx : (sel.length ? 0 : -1));
-      positionPanel();
+      schedulePositionPanel();
       document.addEventListener("pointerdown", onDocumentPointerDown);
+      window.addEventListener("resize", onViewportChange);
+      window.addEventListener("scroll", onViewportChange, true);
       if (typeof opts.onOpen === "function") opts.onOpen(select, api);
     }
 
@@ -374,6 +388,8 @@
       search.removeAttribute("aria-expanded");
       search.removeAttribute("aria-activedescendant");
       document.removeEventListener("pointerdown", onDocumentPointerDown);
+      window.removeEventListener("resize", onViewportChange);
+      window.removeEventListener("scroll", onViewportChange, true);
       if (typeof opts.onClose === "function") opts.onClose(select, api);
     }
 
@@ -407,6 +423,15 @@
       e.stopPropagation();
       e.preventDefault();
       clearSelection();
+      control.focus();
+    });
+    clearBtn.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.stopPropagation();
+        e.preventDefault();
+        clearSelection();
+        control.focus();
+      }
     });
 
     function selectableIndexes() {
@@ -560,19 +585,23 @@
       domObserver = new MutationObserver((mutations) => {
         let structural = false;
         let disabledChanged = false;
+        let requiredChanged = false;
         for (const m of mutations) {
-          if (m.type === "attributes" && m.attributeName === "disabled" && m.target === select) {
-            disabledChanged = true;
+          if (m.type === "attributes" && m.target === select) {
+            if (m.attributeName === "disabled") disabledChanged = true;
+            else if (m.attributeName === "required") requiredChanged = true;
+            else structural = true;
           } else {
             structural = true;
           }
         }
         if (disabledChanged) syncDisabled();
+        if (requiredChanged) syncRequired();
         if (structural) scheduleRebuild();
       });
       domObserver.observe(select, {
         attributes: true,
-        attributeFilter: ["disabled"],
+        attributeFilter: ["disabled", "required"],
         childList: true,
         subtree: true,
         characterData: true
@@ -586,6 +615,8 @@
 
     function destroy() {
       close();
+      window.removeEventListener("resize", onViewportChange);
+      window.removeEventListener("scroll", onViewportChange, true);
       if (domObserver) domObserver.disconnect();
       if (typeTimer) clearTimeout(typeTimer);
       select.removeEventListener("change", setLabel);
@@ -630,12 +661,16 @@
     return api;
   }
 
-  function autoInit() {
-    document.querySelectorAll("select[data-hcg-select]").forEach((el) => hcgSelect(el));
+  function autoInit(root) {
+    const scope = root && root.querySelectorAll ? root : document;
+    scope.querySelectorAll("select[data-hcg-select]").forEach((el) => hcgSelect(el));
   }
+
+  hcgSelect.init = autoInit;
+
   if (typeof document !== "undefined") {
     if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", autoInit);
+      document.addEventListener("DOMContentLoaded", () => autoInit());
     } else {
       autoInit();
     }
