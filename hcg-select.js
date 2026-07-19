@@ -1,8 +1,8 @@
 /*!
  * hcg-select - pure vanilla JS searchable select dropdown
+ * HTML Code Generator (https://www.html-code-generator.com/javascript/searchable-select)
+ * Version: 1.0.3
  * No dependencies. Progressive enhancement of a native <select>.
- * Author: HTML Code Generator
- * Page: https://www.html-code-generator.com/javascript/searchable-select
  * License: MIT
  */
 (function (root, factory) {
@@ -13,6 +13,8 @@
   }
 })(typeof self !== "undefined" ? self : this, function () {
   "use strict";
+
+  const VERSION = "1.0.3";
 
   let idSeq = 0;
 
@@ -308,8 +310,18 @@
       setActive(selectableItems().length ? 0 : -1);
     }
 
+    function eventPathIncludesWrap(e) {
+      if (typeof e.composedPath === "function") {
+        const path = e.composedPath();
+        for (let i = 0; i < path.length; i++) {
+          if (path[i] === wrap) return true;
+        }
+      }
+      return wrap.contains(e.target);
+    }
+
     function onDocumentPointerDown(e) {
-      if (!wrap.contains(e.target)) close();
+      if (!eventPathIncludesWrap(e)) close();
     }
 
     function syncDisabled() {
@@ -526,13 +538,24 @@
     search.addEventListener("input", () => filter(search.value));
     search.addEventListener("keydown", onOpenKeydown);
 
+    /* - keep inside clicks (options, search, scrollbar) from reaching the
+         document pointerdown handler that closes the panel - */
+    wrap.addEventListener("pointerdown", (e) => {
+      e.stopPropagation();
+    });
     list.addEventListener("click", (e) => {
       const li = e.target.closest(".hcg-select-option");
       if (li) choose(li);
     });
 
     wrap.addEventListener("focusout", (e) => {
-      if (e.relatedTarget && !wrap.contains(e.relatedTarget)) close();
+      const rt = e.relatedTarget;
+      if (!rt) return;
+      if (wrap.contains(rt)) return;
+      /* - focus can move to an ancestor (e.g. modal <dialog>) without leaving
+           the widget; only close when focus actually leaves this subtree - */
+      if (rt.contains && rt.contains(wrap)) return;
+      close();
     });
 
     select.addEventListener("change", setLabel);
@@ -667,6 +690,7 @@
   }
 
   hcgSelect.init = autoInit;
+  hcgSelect.version = VERSION;
 
   if (typeof document !== "undefined") {
     if (document.readyState === "loading") {
