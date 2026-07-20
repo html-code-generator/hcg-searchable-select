@@ -1,4 +1,4 @@
-# hcg-searchable-select
+# hcg-searchable-select - Vanilla JavaScript Searchable HTML Select Dropdown
 
 A pure vanilla JavaScript searchable `<select>` dropdown. **No dependencies.** It progressively enhances a normal `<select>` element, so your forms keep working and submit a regular value.
 
@@ -71,6 +71,24 @@ Pin a version for production (e.g. `hcg-searchable-select@1.0.0`) instead of `@1
 ### Direct download
 
 Grab `hcg-select.js` and `hcg-select.css` from the repo and host them yourself.
+
+**Minified builds** (production):
+
+```html
+<link rel="stylesheet" href="min/hcg-select.css">
+<script src="min/hcg-select.min.js"></script>
+```
+
+| File | Raw | Gzipped (approx.) |
+| --- | --- | --- |
+| `min/hcg-select.min.js` | ~12 KB | ~4 KB |
+| `min/hcg-select.css` | ~4 KB | ~1.3 KB |
+
+Regenerate after editing the source files:
+
+```bash
+npm run build:min
+```
 
 ## Usage
 

@@ -1,7 +1,7 @@
 /*!
  * hcg-select - pure vanilla JS searchable select dropdown
  * HTML Code Generator (https://www.html-code-generator.com/javascript/searchable-select)
- * Version: 1.0.3
+ * Version: 1.0.4
  * No dependencies. Progressive enhancement of a native <select>.
  * License: MIT
  */
@@ -14,7 +14,7 @@
 })(typeof self !== "undefined" ? self : this, function () {
   "use strict";
 
-  const VERSION = "1.0.3";
+  const VERSION = "1.0.4";
 
   let idSeq = 0;
 
@@ -162,12 +162,41 @@
     const inertSupported = "inert" in select;
     if (inertSupported) select.inert = true;
 
-    /* - clicking the associated <label for> would natively focus the select;
-         with inert that goes nowhere, so send focus to the control instead - */
-    function onLabelClick() {
-      if (!select.disabled) control.focus();
+    /* - a wrapping <label> forwards every click to the native <select>, which
+         breaks search focus; move the widget out of the label and use for= on the
+         control instead (same UX, no focus stealing) - */
+    let unwrappedFromLabel = false;
+    let controlIdAdded = false;
+    let prevLabelFor = "";
+    const isWrappingLabel = !!(labelEl && select.closest && select.closest("label") === labelEl);
+    if (isWrappingLabel && labelEl.contains(wrap)) {
+      prevLabelFor = labelEl.htmlFor || "";
+      if (!control.id) {
+        control.id = `${uid}-control`;
+        controlIdAdded = true;
+      }
+      const parent = labelEl.parentNode;
+      if (parent) {
+        parent.insertBefore(wrap, labelEl.nextSibling);
+        labelEl.htmlFor = control.id;
+        unwrappedFromLabel = true;
+      }
     }
-    if (labelEl) labelEl.addEventListener("click", onLabelClick);
+
+    /* - fallback when unwrap failed: block label forwarding into the custom UI - */
+    const onLabelMouseDown = (e) => {
+      if (wrap.contains(e.target) && e.target !== select) {
+        e.preventDefault();
+      }
+    };
+    const onLabelClick = (e) => {
+      if (wrap.contains(e.target)) return;
+      if (!select.disabled) control.focus();
+    };
+    if (labelEl && !unwrappedFromLabel) {
+      labelEl.addEventListener("mousedown", onLabelMouseDown);
+      labelEl.addEventListener("click", onLabelClick);
+    }
 
     /* - fallback for engines without inert: forward any focus that lands on
          the hidden select to the control - */
@@ -646,7 +675,15 @@
       select.removeEventListener("change", onValidityCheck);
       select.removeEventListener("invalid", onInvalid);
       select.removeEventListener("focus", onNativeFocus);
-      if (labelEl) labelEl.removeEventListener("click", onLabelClick);
+      if (labelEl && !unwrappedFromLabel) {
+        labelEl.removeEventListener("mousedown", onLabelMouseDown);
+        labelEl.removeEventListener("click", onLabelClick);
+      }
+      if (unwrappedFromLabel && labelEl) {
+        if (controlIdAdded) control.removeAttribute("id");
+        if (prevLabelFor) labelEl.htmlFor = prevLabelFor;
+        else labelEl.removeAttribute("for");
+      }
       if (inertSupported) select.inert = false;
       if (theForm) theForm.removeEventListener("reset", onFormReset);
       /* - restore the native value / selectedIndex setters - */
@@ -655,6 +692,7 @@
         delete select.selectedIndex;
       }
       if (wrap.parentNode) wrap.parentNode.insertBefore(select, wrap);
+      if (unwrappedFromLabel && labelEl) labelEl.appendChild(select);
       select.classList.remove("hcg-select-native");
       select.removeAttribute("tabindex");
       select.removeAttribute("aria-hidden");
