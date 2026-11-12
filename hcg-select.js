@@ -436,6 +436,7 @@
 
     /* - commit a selection by native option index (-1 clears the selection) - */
     function commit(index) {
+      if (select.matches(":disabled")) return;
       if (index < -1 || index >= select.options.length) return;
       select.selectedIndex = index;
       setLabel();
